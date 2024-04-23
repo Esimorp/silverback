@@ -1,7 +1,9 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { APP_LIST } from './channel'
+import pm2 from 'pm2'
 
 function createWindow() {
   // Create the browser window.
@@ -42,6 +44,24 @@ app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
+  pm2.connect(function (err) {
+    if (err) {
+      console.error(err)
+      process.exit(2)
+    }
+    ipcMain.handle(APP_LIST, () => {
+      console.log('app-list')
+      return new Promise((resolve, reject) => {
+        pm2.list((err, list) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(list)
+          }
+        })
+      })
+    })
+  })
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -50,7 +70,10 @@ app.whenReady().then(() => {
   })
 
   // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on('ping', () => {
+    ipcMain.emit('app-list', [1, 2, 3])
+    console.log('pong')
+  })
 
   createWindow()
 

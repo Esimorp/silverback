@@ -1,5 +1,6 @@
 import Versions from './components/Versions'
 import electronLogo from './assets/electron.svg'
+import { AppList } from './components/AppList'
 
 function App() {
   const ipcHandle = () => window.electron.ipcRenderer.send('ping')
@@ -11,6 +12,7 @@ function App() {
       <div className="text">
         Build an Electron app with <span className="react">React</span>
       </div>
+      <AppList />
       <p className="tip">
         Please try pressing <code>F12</code> to open the devTool
       </p>
@@ -33,4 +35,3 @@ function App() {
 }
 
 export default App
-
